@@ -4,15 +4,18 @@ const port = 12672;
 
 const { spawn } = require('child_process');
 
-const srv = spawn("python", ["spacytest.py"]);
+const srv = spawn("python", ["./spacytest.py"]);
 
 let spacyWaiters = [];
 let spacyStarted = false;
 srv.stdout.on("data", data => {
-    console.log(data);
-    spacyWaiters.forEach(i => i.startWS());
-    spacyWaiters = [];
-    spacyStarted = true;
+    console.log(data.toString());
+    if (data.toString().includes("SPACY OK")) {
+        spacyWaiters.forEach(i => i.startWS());
+        spacyWaiters = [];
+        spacyStarted = true;
+        console.log("ok");
+    }
 });
 
 srv.stderr.on("data", data => {
@@ -27,7 +30,6 @@ srv.on("close", code => {
     console.log(`child process exited with code ${code}`);
 });
 
-console.log("spawned");
 
 
 module.exports = function spacy() {

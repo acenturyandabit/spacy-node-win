@@ -2,10 +2,14 @@ import spacy
 import json
 import websockets
 import asyncio
+import sys
 PORT=12672
 
+print("STARTING...")
+sys.stdout.flush()
 nlp = spacy.load("en_core_web_md")
 print("SPACY OK")
+sys.stdout.flush()
 # open a websocket
 async def spacify(websocket, path):
     while True:
