@@ -1,34 +1,38 @@
 const WebSocket = require('ws');
 
 const port = 12672;
+const plsSpawn = false;
 
 const { spawn } = require('child_process');
 
-const srv = spawn("python", ["./spacytest.py"]);
-
 let spacyWaiters = [];
 let spacyStarted = false;
-srv.stdout.on("data", data => {
-    console.log(data.toString());
-    if (data.toString().includes("SPACY OK")) {
-        spacyWaiters.forEach(i => i.startWS());
-        spacyWaiters = [];
-        spacyStarted = true;
-        console.log("ok");
-    }
-});
+if (plsSpawn) {
+    const srv = spawn("python", ["./spacytest.py"]);
+    srv.stdout.on("data", data => {
+        console.log(data.toString());
+        if (data.toString().includes("SPACY OK")) {
+            spacyWaiters.forEach(i => i.startWS());
+            spacyWaiters = [];
+            spacyStarted = true;
+        }
+    });
 
-srv.stderr.on("data", data => {
-    console.log(`stderr: ${data}`);
-});
+    srv.stderr.on("data", data => {
+        console.log(`stderr: ${data}`);
+    });
 
-srv.on('error', (error) => {
-    console.log(`error: ${error.message}`);
-});
+    srv.on('error', (error) => {
+        console.log(`error: ${error.message}`);
+    });
 
-srv.on("close", code => {
-    console.log(`child process exited with code ${code}`);
-});
+    srv.on("close", code => {
+        console.log(`child process exited with code ${code}`);
+    });
+} else {
+    spacyStarted = true;
+}
+
 
 
 
@@ -52,6 +56,7 @@ module.exports = function spacy() {
             backlog.forEach(i => {
                 i[0](this.nlp(i[1]));
             })
+            //console.log("ok we good");
         })
     }
     if (spacyStarted) this.startWS();
